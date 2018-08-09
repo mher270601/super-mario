@@ -1,3 +1,4 @@
+import AudioBoard from './AudioBoard.js';
 import Camera from './Camera.js';
 import Entity from './Entity.js';
 import PlayerController from './traits/PlayerController.js';
@@ -19,45 +20,19 @@ function createPlayerEnv(playerEntity) {
     return playerEnv;
 }
 
-class AudioBoard {
-    constructor(context) {
-        this.context = context;
-        this.buffers = new Map();
-    }
-
-    addAudio(name, buffer) {
-        this.buffers.set(name, buffer);
-    }
-
-    playAudio(name) {
-        const source = this.context.createBufferSource();
-        source.connect(this.context.destination);
-        source.buffer = this.buffers.get(name);
-        source.start(0);
-    }
-}
-
 async function main(canvas) {
     const context = canvas.getContext('2d');
+    const audioContext = new AudioContext();
 
     const [entityFactory, font] = await Promise.all([
-        loadEntities(),
+        loadEntities(audioContext),
         loadFont(),
     ]);
 
-    const audioContext = new AudioContext();
     const audioBoard = new AudioBoard(audioContext);
     const loadAudio = createAudioLoader(audioContext);
     const loadLevel = createLevelLoader(entityFactory);
 
-    loadAudio('/audio/jump.ogg')
-    .then(buffer => {
-        audioBoard.addAudio('jump', buffer);
-    });
-    loadAudio('/audio/stomp.ogg')
-    .then(buffer => {
-        audioBoard.addAudio('stomp', buffer);
-    });
     loadAudio('/audio/coin.ogg')
     .then(buffer => {
         audioBoard.addAudio('bump', buffer);

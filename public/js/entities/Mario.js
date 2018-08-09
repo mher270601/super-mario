@@ -5,17 +5,23 @@ import Killable from '../traits/Killable.js';
 import Physics from '../traits/Physics.js';
 import Solid from '../traits/Solid.js';
 import Stomper from '../traits/Stomper.js';
+import {loadAudioBoard} from '../loaders/audio.js';
 import {loadSpriteSheet} from '../loaders.js';
 
 const SLOW_DRAG = 1/1000;
 const FAST_DRAG = 1/5000;
 
-export function loadMario() {
-    return loadSpriteSheet('mario')
-    .then(createMarioFactory);
+export function loadMario(audioContext) {
+    return Promise.all([
+        loadSpriteSheet('mario'),
+        loadSounds('mario', audioContext),
+    ])
+    .then(([sprite, sounds]) => {
+        return createMarioFactory(sprite, sounds);
+    });
 }
 
-function createMarioFactory(sprite) {
+function createMarioFactory(sprite, sounds) {
     const runAnim = sprite.animations.get('run');
 
     function routeFrame(mario) {
